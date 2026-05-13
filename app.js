@@ -12,35 +12,7 @@ const WEBHOOK_URLS = {
 };
 
 // --- MOCK DATA ---
-const MOCK_ASSETS = [
-    {
-        email: "mockuser@mail.com", // Gizli alan
-        varlik: "THYAO",
-        tur: "Hisse Senedi",
-        adet: 1500,
-        guncellemeTarihi: "2023-10-25",
-        guncelFiyat: 220.50,
-        toplamDeger: 330750.00
-    },
-    {
-        email: "mockuser@mail.com",
-        varlik: "Gram Altın",
-        tur: "Emtia",
-        adet: 250,
-        guncellemeTarihi: "2023-10-26",
-        guncelFiyat: 1805.20,
-        toplamDeger: 451300.00
-    },
-    {
-        email: "mockuser@mail.com",
-        varlik: "AAPL",
-        tur: "Yabancı Hisse",
-        adet: 50,
-        guncellemeTarihi: "2023-10-24",
-        guncelFiyat: 4850.00, // TL karşılığı varsayımsal
-        toplamDeger: 242500.00
-    }
-];
+const MOCK_ASSETS = [];
 
 // --- DOM ELEMENTS ---
 const elements = {
@@ -325,10 +297,15 @@ function renderAssetTable(assets) {
     if (assets.length === 0) {
         elements.assetTableBody.innerHTML = `
             <tr>
-                <td colspan="6" class="px-6 py-8 text-center text-slate-500">
-                    <div class="flex flex-col items-center justify-center">
-                        <i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i>
-                        <p>Henüz bir varlık bulunmamaktadır.</p>
+                <td colspan="6" class="px-12 py-16 text-center">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-2 shadow-sm">
+                            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-slate-700">Varlıklarınız Burada Görünür</h3>
+                        <p class="text-sm text-slate-400">Henüz Varlık Eklemediniz</p>
                     </div>
                 </td>
             </tr>

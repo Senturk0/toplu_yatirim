@@ -7,7 +7,7 @@
 const WEBHOOK_URLS = {
     LOGIN: 'YOUR_WEBHOOK_URL/login',
     REGISTER: 'YOUR_WEBHOOK_URL/register',
-    SUBMIT_ACTION: 'YOUR_WEBHOOK_URL/action',
+    SUBMIT_ACTION: 'https://tamamdir.app.n8n.cloud/webhook-test/186520f5-af8f-41eb-a23b-add104802a0e',
     GET_ASSETS: 'YOUR_WEBHOOK_URL/assets'
 };
 
@@ -224,6 +224,8 @@ async function handleActionSubmit(e) {
     const actionType = document.querySelector('input[name="action_type"]:checked').value;
     const file = elements.fileUpload.files[0];
     const userEmail = localStorage.getItem('toplu_yatirim_user');
+    const varlikKodu = document.getElementById('varlik-kodu').value;
+    const adet = document.getElementById('adet').value;
 
     if (!actionType) {
         showToast('Lütfen bir işlem tipi seçiniz.', 'warning');
@@ -233,6 +235,9 @@ async function handleActionSubmit(e) {
     const formData = new FormData();
     formData.append('email', userEmail);
     formData.append('actionType', actionType);
+    formData.append('varlik_kodu', varlikKodu);
+    formData.append('adet', adet);
+    
     if (file) {
         formData.append('file', file);
     }
@@ -243,15 +248,16 @@ async function handleActionSubmit(e) {
     btn.disabled = true;
 
     try {
-        // --- API PLACEHOLDER ---
-        // const response = await fetch(WEBHOOK_URLS.SUBMIT_ACTION, {
-        //     method: 'POST',
-        //     body: formData // multipart/form-data
-        // });
+        const response = await fetch(WEBHOOK_URLS.SUBMIT_ACTION, {
+            method: 'POST',
+            body: formData // multipart/form-data
+        });
         
-        await new Promise(r => setTimeout(r, 1200));
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         
-        showToast('İşleminiz başarıyla kaydedildi.', 'success');
+        showToast('İşlem başarıyla n8n sistemine iletildi', 'success');
         elements.actionForm.reset();
         elements.fileNameDisplay.classList.add('hidden');
         

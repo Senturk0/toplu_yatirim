@@ -4,11 +4,11 @@
  */
 
 // --- CONFIGURATION ---
+const MASTER_WEBHOOK = 'https://tamamdir.app.n8n.cloud/webhook-test/186520f5-af8f-41eb-a23b-add104802a0e';
 const WEBHOOK_URLS = {
-    LOGIN: 'YOUR_WEBHOOK_URL/login',
-    REGISTER: 'YOUR_WEBHOOK_URL/register',
-    SUBMIT_ACTION: 'https://tamamdir.app.n8n.cloud/webhook-test/186520f5-af8f-41eb-a23b-add104802a0e',
-    GET_ASSETS: 'YOUR_WEBHOOK_URL/assets'
+    AUTH: MASTER_WEBHOOK,
+    SUBMIT_ACTION: MASTER_WEBHOOK,
+    GET_ASSETS: MASTER_WEBHOOK
 };
 
 // --- MOCK DATA ---
@@ -126,25 +126,27 @@ async function handleLogin(e) {
     btn.disabled = true;
 
     try {
-        // --- API PLACEHOLDER ---
-        // const response = await fetch(WEBHOOK_URLS.LOGIN, {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({ email, password })
-        // });
-        // const data = await response.json();
+        const response = await fetch(WEBHOOK_URLS.AUTH, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ actionType: 'login', email, password })
+        });
         
-        // Simulating API delay
-        await new Promise(r => setTimeout(r, 1000));
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
-        // Simulating success
-        localStorage.setItem('toplu_yatirim_user', email);
-        showToast('Başarıyla giriş yapıldı!', 'success');
-        showDashboard(email);
+        const data = await response.json();
+        
+        if (data.success) {
+            localStorage.setItem('toplu_yatirim_user', email);
+            showToast(data.message || 'Başarıyla giriş yapıldı!', 'success');
+            showDashboard(email);
+        } else {
+            throw new Error(data.message || 'Giriş başarısız.');
+        }
         
     } catch (error) {
         console.error('Login Error:', error);
-        showToast('Giriş yapılırken bir hata oluştu.', 'error');
+        showToast(error.message || 'Giriş yapılırken bir hata oluştu.', 'error');
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
@@ -163,22 +165,27 @@ async function handleRegister(e) {
     btn.disabled = true;
 
     try {
-        // --- API PLACEHOLDER ---
-        // const response = await fetch(WEBHOOK_URLS.REGISTER, {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({ name, email, password })
-        // });
+        const response = await fetch(WEBHOOK_URLS.AUTH, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ actionType: 'register', name, email, password })
+        });
         
-        await new Promise(r => setTimeout(r, 1000));
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
-        showToast('Hesabınız oluşturuldu. Giriş yapabilirsiniz.', 'success');
-        toggleAuthForms('login');
-        document.getElementById('login-email').value = email;
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast(data.message || 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.', 'success');
+            toggleAuthForms('login');
+            document.getElementById('login-email').value = email;
+        } else {
+            throw new Error(data.message || 'Kayıt işlemi başarısız.');
+        }
         
     } catch (error) {
         console.error('Register Error:', error);
-        showToast('Kayıt olurken bir hata oluştu.', 'error');
+        showToast(error.message || 'Kayıt olurken bir hata oluştu.', 'error');
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
@@ -281,20 +288,24 @@ async function handleActionSubmit(e) {
             body: formData // multipart/form-data
         });
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast(data.message || 'İşlem başarıyla n8n sistemine iletildi', 'success');
+            elements.actionForm.reset();
+            handleFileSelect(); // Reset UX states and hide file name display
+            
+            // Refresh table data
+            loadAssetsData();
+        } else {
+            throw new Error(data.message || 'İşlem başarısız.');
         }
-        
-        showToast('İşlem başarıyla n8n sistemine iletildi', 'success');
-        elements.actionForm.reset();
-        handleFileSelect(); // Reset UX states and hide file name display
-        
-        // Refresh table data
-        loadAssetsData();
         
     } catch (error) {
         console.error('Submit Error:', error);
-        showToast('İşlem gönderilirken hata oluştu.', 'error');
+        showToast(error.message || 'İşlem gönderilirken hata oluştu.', 'error');
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
@@ -307,17 +318,26 @@ async function loadAssetsData() {
     let assets = [];
 
     try {
-        // --- API PLACEHOLDER ---
-        // const response = await fetch(`${WEBHOOK_URLS.GET_ASSETS}?email=${userEmail}`);
-        // assets = await response.json();
+        const response = await fetch(WEBHOOK_URLS.GET_ASSETS, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ actionType: 'getAssets', email: userEmail })
+        });
         
-        // Simulating fetch
-        await new Promise(r => setTimeout(r, 500));
-        assets = MOCK_ASSETS; // Using mock data
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Assume data.assets contains the array, or data itself if data.assets is undefined but data is an array
+            assets = Array.isArray(data.assets) ? data.assets : (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
+        } else {
+            throw new Error(data.message || 'Varlık verileri alınamadı.');
+        }
         
     } catch (error) {
         console.error('Fetch Assets Error:', error);
-        showToast('Veriler çekilirken hata oluştu.', 'error');
+        showToast(error.message || 'Veriler çekilirken hata oluştu.', 'error');
         return;
     }
 
@@ -426,18 +446,21 @@ window.handleDirectSell = async function(varlikKodu) {
             body: formData
         });
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast(data.message || `${miktar} adet ${varlikKodu} başarıyla n8n sistemine iletildi`, 'success');
+            // Refresh table data
+            loadAssetsData();
+        } else {
+            throw new Error(data.message || 'Satış işlemi başarısız.');
         }
-        
-        showToast(`${miktar} adet ${varlikKodu} başarıyla n8n sistemine iletildi`, 'success');
-        
-        // Refresh table data
-        loadAssetsData();
         
     } catch (error) {
         console.error('Direct Sell Error:', error);
-        showToast('Satış işlemi gönderilirken hata oluştu.', 'error');
+        showToast(error.message || 'Satış işlemi gönderilirken hata oluştu.', 'error');
     }
 };
 

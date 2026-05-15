@@ -331,7 +331,7 @@ function renderAssetTable(assets) {
     if (assets.length === 0) {
         elements.assetTableBody.innerHTML = `
             <tr>
-                <td colspan="6" class="px-12 py-16 text-center">
+                <td colspan="7" class="px-12 py-16 text-center">
                     <div class="flex flex-col items-center justify-center space-y-2">
                         <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-2 shadow-sm">
                             <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -389,6 +389,11 @@ function renderAssetTable(assets) {
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-slate-600">${formattedFiyat}</td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-slate-900">${formattedToplam}</td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-slate-500">${formattedDate}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button onclick="handleDirectSell('${asset.varlik}')" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition-colors border border-red-200 shadow-sm font-semibold">
+                    Sat
+                </button>
+            </td>
         `;
         
         elements.assetTableBody.appendChild(tr);
@@ -396,6 +401,45 @@ function renderAssetTable(assets) {
 
     elements.totalPortfolioValue.textContent = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(grandTotal);
 }
+
+// --- DIRECT SELL LOGIC ---
+window.handleDirectSell = async function(varlikKodu) {
+    const miktar = prompt(`Kaç adet ${varlikKodu} satmak istiyorsunuz?`);
+    if (!miktar || isNaN(miktar) || Number(miktar) <= 0) {
+        if (miktar !== null) {
+            showToast('Geçerli bir miktar girmediniz.', 'warning');
+        }
+        return;
+    }
+
+    const userEmail = localStorage.getItem('toplu_yatirim_user');
+    
+    const formData = new FormData();
+    formData.append('email', userEmail);
+    formData.append('actionType', 'sell');
+    formData.append('varlik_kodu', varlikKodu);
+    formData.append('adet', miktar);
+
+    try {
+        const response = await fetch(WEBHOOK_URLS.SUBMIT_ACTION, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        showToast(`${miktar} adet ${varlikKodu} başarıyla n8n sistemine iletildi`, 'success');
+        
+        // Refresh table data
+        loadAssetsData();
+        
+    } catch (error) {
+        console.error('Direct Sell Error:', error);
+        showToast('Satış işlemi gönderilirken hata oluştu.', 'error');
+    }
+};
 
 // --- UTILS ---
 function showToast(message, type = 'info') {

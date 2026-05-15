@@ -210,11 +210,34 @@ function showAuthView() {
 // --- DASHBOARD ACTIONS ---
 function handleFileSelect() {
     const file = elements.fileUpload.files[0];
+    const varlikKoduInput = document.getElementById('varlik-kodu');
+    const adetInput = document.getElementById('adet');
+
     if (file) {
         elements.fileNameDisplay.textContent = file.name;
         elements.fileNameDisplay.classList.remove('hidden');
+        
+        // Disable inputs if file is present
+        varlikKoduInput.disabled = true;
+        varlikKoduInput.value = '';
+        varlikKoduInput.placeholder = 'Veriler dosyadan okunacak...';
+        varlikKoduInput.classList.add('bg-slate-100', 'text-slate-400');
+        
+        adetInput.disabled = true;
+        adetInput.value = '';
+        adetInput.placeholder = 'Veriler dosyadan okunacak...';
+        adetInput.classList.add('bg-slate-100', 'text-slate-400');
     } else {
         elements.fileNameDisplay.classList.add('hidden');
+        
+        // Enable inputs if no file
+        varlikKoduInput.disabled = false;
+        varlikKoduInput.placeholder = 'Örn: THYAO';
+        varlikKoduInput.classList.remove('bg-slate-100', 'text-slate-400');
+        
+        adetInput.disabled = false;
+        adetInput.placeholder = 'Örn: 100';
+        adetInput.classList.remove('bg-slate-100', 'text-slate-400');
     }
 }
 
@@ -229,6 +252,11 @@ async function handleActionSubmit(e) {
 
     if (!actionType) {
         showToast('Lütfen bir işlem tipi seçiniz.', 'warning');
+        return;
+    }
+
+    if (!file && (!varlikKodu || !adet)) {
+        showToast('Lütfen ya bir dosya yükleyin ya da bilgileri elle girin.', 'warning');
         return;
     }
 
@@ -259,7 +287,7 @@ async function handleActionSubmit(e) {
         
         showToast('İşlem başarıyla n8n sistemine iletildi', 'success');
         elements.actionForm.reset();
-        elements.fileNameDisplay.classList.add('hidden');
+        handleFileSelect(); // Reset UX states and hide file name display
         
         // Refresh table data
         loadAssetsData();

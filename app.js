@@ -4,11 +4,10 @@
  */
 
 // --- CONFIGURATION ---
-const MASTER_WEBHOOK = 'https://tamamdir.app.n8n.cloud/webhook-test/186520f5-af8f-41eb-a23b-add104802a0e';
 const WEBHOOK_URLS = {
-    AUTH: MASTER_WEBHOOK,
-    SUBMIT_ACTION: MASTER_WEBHOOK,
-    GET_ASSETS: MASTER_WEBHOOK
+    AUTH: 'https://tamamdir.app.n8n.cloud/webhook/186520f5-af8f-41eb-a23b-add104802a0e',
+    SUBMIT_ACTION: 'https://tamamdir.app.n8n.cloud/webhook/ea0312fd-369a-4787-a3ab-13bb9d3fe0e7',
+    GET_ASSETS: 'https://tamamdir.app.n8n.cloud/webhook/get-assets'
 };
 
 // --- MOCK DATA ---

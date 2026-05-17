@@ -7,7 +7,7 @@
 const WEBHOOK_URLS = {
     AUTH: 'https://tamamdir.app.n8n.cloud/webhook-test/ea0312fd-369a-4787-a3ab-13bb9d3fe0e7',
     SUBMIT_ACTION: 'https://tamamdir.app.n8n.cloud/webhook-test/186520f5-af8f-41eb-a23b-add104802a0e',
-    GET_ASSETS: 'https://tamamdir.app.n8n.cloud/webhook-test/186520f5-af8f-41eb-a23b-add104802a0e'
+    GET_ASSETS: 'https://tamamdir.app.n8n.cloud/webhook-test/get-assets'
 };
 
 // --- MOCK DATA ---
@@ -314,29 +314,33 @@ async function handleActionSubmit(e) {
 // --- TABLE DATA MANAGEMENT ---
 async function loadAssetsData() {
     const userEmail = localStorage.getItem('toplu_yatirim_user');
+    
+    if (!userEmail) {
+        showToast('Oturum bilgisi bulunamadı. Lütfen giriş yapın.', 'error');
+        return;
+    }
+
     let assets = [];
 
     try {
         const response = await fetch(WEBHOOK_URLS.GET_ASSETS, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ actionType: 'getAssets', email: userEmail })
+            body: JSON.stringify({ email: userEmail })
         });
         
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
-        const data = await response.json();
+        // n8n'den dönen JSON dizisi doğrudan array olarak kabul ediliyor
+        assets = await response.json();
         
-        if (data.success) {
-            // Assume data.assets contains the array, or data itself if data.assets is undefined but data is an array
-            assets = Array.isArray(data.assets) ? data.assets : (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
-        } else {
-            throw new Error(data.message || 'Varlık verileri alınamadı.');
+        if (!Array.isArray(assets)) {
+            assets = []; // Gelen veri bir dizi değilse boş diziye çevir
         }
         
     } catch (error) {
         console.error('Fetch Assets Error:', error);
-        showToast(error.message || 'Veriler çekilirken hata oluştu.', 'error');
+        showToast('Varlıklar yüklenirken bir hata oluştu', 'error');
         return;
     }
 

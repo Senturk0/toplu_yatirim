@@ -4,10 +4,11 @@
  */
 
 // --- CONFIGURATION ---
+const MASTER_WEBHOOK = 'https://tamamdir.app.n8n.cloud/webhook-test/186520f5-af8f-41eb-a23b-add104802a0e';
 const WEBHOOK_URLS = {
-    AUTH: 'https://tamamdir.app.n8n.cloud/webhook-test/ea0312fd-369a-4787-a3ab-13bb9d3fe0e7',
-    SUBMIT_ACTION: 'https://tamamdir.app.n8n.cloud/webhook-test/186520f5-af8f-41eb-a23b-add104802a0e',
-    GET_ASSETS: 'https://tamamdir.app.n8n.cloud/webhook-test/get-assets'
+    AUTH: MASTER_WEBHOOK,
+    SUBMIT_ACTION: MASTER_WEBHOOK,
+    GET_ASSETS: MASTER_WEBHOOK
 };
 
 // --- MOCK DATA ---
@@ -18,18 +19,18 @@ const elements = {
     // Views
     authView: document.getElementById('auth-view'),
     dashboardView: document.getElementById('dashboard-view'),
-    
+
     // Auth Forms
     loginFormContainer: document.getElementById('login-form-container'),
     registerFormContainer: document.getElementById('register-form-container'),
     loginForm: document.getElementById('login-form'),
     registerForm: document.getElementById('register-form'),
-    
+
     // Auth Buttons
     switchToRegisterBtn: document.getElementById('switch-to-register'),
     switchToLoginBtn: document.getElementById('switch-to-login'),
     logoutBtn: document.getElementById('logout-btn'),
-    
+
     // Dashboard Elements
     userEmailDisplay: document.getElementById('user-email-display'),
     actionForm: document.getElementById('action-form'),
@@ -39,7 +40,7 @@ const elements = {
     submitActionBtn: document.getElementById('submit-action-btn'),
     assetTableBody: document.getElementById('asset-table-body'),
     totalPortfolioValue: document.getElementById('total-portfolio-value'),
-    
+
     toastContainer: document.getElementById('toast-container')
 };
 
@@ -55,7 +56,7 @@ function setupEventListeners() {
     elements.switchToRegisterBtn.addEventListener('click', () => {
         toggleAuthForms('register');
     });
-    
+
     elements.switchToLoginBtn.addEventListener('click', () => {
         toggleAuthForms('login');
     });
@@ -67,7 +68,7 @@ function setupEventListeners() {
 
     // Dashboard Actions
     elements.actionForm.addEventListener('submit', handleActionSubmit);
-    
+
     // File Upload Drag & Drop Styling
     elements.fileUpload.addEventListener('change', handleFileSelect);
     elements.dropzone.addEventListener('dragover', (e) => {
@@ -118,7 +119,7 @@ async function handleLogin(e) {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
-    
+
     const btn = e.target.querySelector('button');
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Giriş Yapılıyor...';
@@ -130,11 +131,11 @@ async function handleLogin(e) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ actionType: 'login', email, password })
         });
-        
+
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             localStorage.setItem('toplu_yatirim_user', email);
             showToast(data.message || 'Başarıyla giriş yapıldı!', 'success');
@@ -142,7 +143,7 @@ async function handleLogin(e) {
         } else {
             throw new Error(data.message || 'Giriş başarısız.');
         }
-        
+
     } catch (error) {
         console.error('Login Error:', error);
         showToast(error.message || 'Giriş yapılırken bir hata oluştu.', 'error');
@@ -169,11 +170,11 @@ async function handleRegister(e) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ actionType: 'register', name, email, password })
         });
-        
+
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             showToast(data.message || 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.', 'success');
             toggleAuthForms('login');
@@ -181,7 +182,7 @@ async function handleRegister(e) {
         } else {
             throw new Error(data.message || 'Kayıt işlemi başarısız.');
         }
-        
+
     } catch (error) {
         console.error('Register Error:', error);
         showToast(error.message || 'Kayıt olurken bir hata oluştu.', 'error');
@@ -203,7 +204,7 @@ function showDashboard(email) {
     elements.authView.classList.add('hidden-section');
     elements.dashboardView.classList.remove('hidden-section');
     elements.userEmailDisplay.textContent = email;
-    
+
     // Load data when dashboard is shown
     loadAssetsData();
 }
@@ -222,25 +223,25 @@ function handleFileSelect() {
     if (file) {
         elements.fileNameDisplay.textContent = file.name;
         elements.fileNameDisplay.classList.remove('hidden');
-        
+
         // Disable inputs if file is present
         varlikKoduInput.disabled = true;
         varlikKoduInput.value = '';
         varlikKoduInput.placeholder = 'Veriler dosyadan okunacak...';
         varlikKoduInput.classList.add('bg-slate-100', 'text-slate-400');
-        
+
         adetInput.disabled = true;
         adetInput.value = '';
         adetInput.placeholder = 'Veriler dosyadan okunacak...';
         adetInput.classList.add('bg-slate-100', 'text-slate-400');
     } else {
         elements.fileNameDisplay.classList.add('hidden');
-        
+
         // Enable inputs if no file
         varlikKoduInput.disabled = false;
         varlikKoduInput.placeholder = 'Örn: THYAO';
         varlikKoduInput.classList.remove('bg-slate-100', 'text-slate-400');
-        
+
         adetInput.disabled = false;
         adetInput.placeholder = 'Örn: 100';
         adetInput.classList.remove('bg-slate-100', 'text-slate-400');
@@ -249,7 +250,7 @@ function handleFileSelect() {
 
 async function handleActionSubmit(e) {
     e.preventDefault();
-    
+
     const actionType = document.querySelector('input[name="action_type"]:checked').value;
     const file = elements.fileUpload.files[0];
     const userEmail = localStorage.getItem('toplu_yatirim_user');
@@ -271,7 +272,7 @@ async function handleActionSubmit(e) {
     formData.append('actionType', actionType);
     formData.append('varlik_kodu', varlikKodu);
     formData.append('adet', adet);
-    
+
     if (file) {
         formData.append('file', file);
     }
@@ -286,22 +287,22 @@ async function handleActionSubmit(e) {
             method: 'POST',
             body: formData // multipart/form-data
         });
-        
+
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             showToast(data.message || 'İşlem başarıyla n8n sistemine iletildi', 'success');
             elements.actionForm.reset();
             handleFileSelect(); // Reset UX states and hide file name display
-            
+
             // Refresh table data
             loadAssetsData();
         } else {
             throw new Error(data.message || 'İşlem başarısız.');
         }
-        
+
     } catch (error) {
         console.error('Submit Error:', error);
         showToast(error.message || 'İşlem gönderilirken hata oluştu.', 'error');
@@ -314,33 +315,29 @@ async function handleActionSubmit(e) {
 // --- TABLE DATA MANAGEMENT ---
 async function loadAssetsData() {
     const userEmail = localStorage.getItem('toplu_yatirim_user');
-    
-    if (!userEmail) {
-        showToast('Oturum bilgisi bulunamadı. Lütfen giriş yapın.', 'error');
-        return;
-    }
-
     let assets = [];
 
     try {
         const response = await fetch(WEBHOOK_URLS.GET_ASSETS, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: userEmail })
+            body: JSON.stringify({ actionType: 'getAssets', email: userEmail })
         });
-        
+
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
-        // n8n'den dönen JSON dizisi doğrudan array olarak kabul ediliyor
-        assets = await response.json();
-        
-        if (!Array.isArray(assets)) {
-            assets = []; // Gelen veri bir dizi değilse boş diziye çevir
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Assume data.assets contains the array, or data itself if data.assets is undefined but data is an array
+            assets = Array.isArray(data.assets) ? data.assets : (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
+        } else {
+            throw new Error(data.message || 'Varlık verileri alınamadı.');
         }
-        
+
     } catch (error) {
         console.error('Fetch Assets Error:', error);
-        showToast('Varlıklar yüklenirken bir hata oluştu', 'error');
+        showToast(error.message || 'Veriler çekilirken hata oluştu.', 'error');
         return;
     }
 
@@ -373,17 +370,17 @@ function renderAssetTable(assets) {
 
     assets.forEach((asset, index) => {
         grandTotal += asset.toplamDeger;
-        
+
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 transition-colors group';
         tr.style.animation = `fadeIn 0.3s ease-out ${index * 0.1}s forwards`;
         tr.style.opacity = '0';
-        
+
         // Format numbers
         const formattedAdet = new Intl.NumberFormat('tr-TR').format(asset.adet);
         const formattedFiyat = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(asset.guncelFiyat);
         const formattedToplam = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(asset.toplamDeger);
-        
+
         // Format date
         const dateObj = new Date(asset.guncellemeTarihi);
         const formattedDate = dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -418,7 +415,7 @@ function renderAssetTable(assets) {
                 </button>
             </td>
         `;
-        
+
         elements.assetTableBody.appendChild(tr);
     });
 
@@ -426,7 +423,7 @@ function renderAssetTable(assets) {
 }
 
 // --- DIRECT SELL LOGIC ---
-window.handleDirectSell = async function(varlikKodu) {
+window.handleDirectSell = async function (varlikKodu) {
     const miktar = prompt(`Kaç adet ${varlikKodu} satmak istiyorsunuz?`);
     if (!miktar || isNaN(miktar) || Number(miktar) <= 0) {
         if (miktar !== null) {
@@ -436,7 +433,7 @@ window.handleDirectSell = async function(varlikKodu) {
     }
 
     const userEmail = localStorage.getItem('toplu_yatirim_user');
-    
+
     const formData = new FormData();
     formData.append('email', userEmail);
     formData.append('actionType', 'sell');
@@ -448,11 +445,11 @@ window.handleDirectSell = async function(varlikKodu) {
             method: 'POST',
             body: formData
         });
-        
+
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             showToast(data.message || `${miktar} adet ${varlikKodu} başarıyla n8n sistemine iletildi`, 'success');
             // Refresh table data
@@ -460,7 +457,7 @@ window.handleDirectSell = async function(varlikKodu) {
         } else {
             throw new Error(data.message || 'Satış işlemi başarısız.');
         }
-        
+
     } catch (error) {
         console.error('Direct Sell Error:', error);
         showToast(error.message || 'Satış işlemi gönderilirken hata oluştu.', 'error');
@@ -470,10 +467,10 @@ window.handleDirectSell = async function(varlikKodu) {
 // --- UTILS ---
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
-    
+
     let icon = 'fa-info-circle';
     let colors = 'bg-blue-50 border-blue-200 text-blue-800';
-    
+
     if (type === 'success') {
         icon = 'fa-check-circle';
         colors = 'bg-green-50 border-green-200 text-green-800';

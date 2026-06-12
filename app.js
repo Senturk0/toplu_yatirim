@@ -133,7 +133,9 @@ async function handleLogin(e) {
 
         const data = await response.json();
 
-        if (data.success === true || data.success === 'true') {
+        const isSuccess = data.success === true || data.success === 'true' || data.status === 'success' || (data.message && data.message.toLowerCase().includes('başarı'));
+
+        if (isSuccess) {
             localStorage.setItem('toplu_yatirim_user', email);
             showToast(data.message || 'Başarıyla giriş yapıldı!', 'success');
             showDashboard(email);
@@ -170,7 +172,9 @@ async function handleRegister(e) {
 
         const data = await response.json();
 
-        if (data.success === true || data.success === 'true') {
+        const isSuccess = data.success === true || data.success === 'true' || data.status === 'success' || (data.message && data.message.toLowerCase().includes('başarı'));
+
+        if (isSuccess) {
             showToast(data.message || 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.', 'success');
             toggleAuthForms('login');
             document.getElementById('login-email').value = email;
@@ -285,7 +289,9 @@ async function handleActionSubmit(e) {
 
         const data = await response.json();
 
-        if (data.success === true || data.success === 'true') {
+        const isSuccess = data.success === true || data.success === 'true' || data.status === 'success' || (data.message && data.message.toLowerCase().includes('başarı'));
+
+        if (isSuccess) {
             showToast(data.message || 'İşlem başarıyla n8n sistemine iletildi', 'success');
             elements.actionForm.reset();
             handleFileSelect(); // Reset UX states and hide file name display
@@ -319,7 +325,9 @@ async function loadAssetsData() {
 
         const data = await response.json();
 
-        if (data.success === true || data.success === 'true') {
+        const isSuccess = data.success === true || data.success === 'true' || data.status === 'success' || (data.message && data.message.toLowerCase().includes('başarı'));
+
+        if (isSuccess) {
             // Assume data.assets contains the array, or data itself if data.assets is undefined but data is an array
             assets = Array.isArray(data.assets) ? data.assets : (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
         } else {
@@ -439,7 +447,9 @@ window.handleDirectSell = async function (varlikKodu) {
 
         const data = await response.json();
 
-        if (data.success === true || data.success === 'true') {
+        const isSuccess = data.success === true || data.success === 'true' || data.status === 'success' || (data.message && data.message.toLowerCase().includes('başarı'));
+
+        if (isSuccess) {
             showToast(data.message || `${miktar} adet ${varlikKodu} başarıyla n8n sistemine iletildi`, 'success');
             // Refresh table data
             loadAssetsData();

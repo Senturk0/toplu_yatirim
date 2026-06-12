@@ -5,9 +5,9 @@
 
 // --- CONFIGURATION ---
 const WEBHOOK_URLS = {
-    AUTH: 'https://tamamdir.app.n8n.cloud/webhook/186520f5-af8f-41eb-a23b-add104802a0e',
-    SUBMIT_ACTION: 'https://tamamdir.app.n8n.cloud/webhook/ea0312fd-369a-4787-a3ab-13bb9d3fe0e7',
-    GET_ASSETS: 'https://tamamdir.app.n8n.cloud/webhook/get-assets'
+    AUTH: 'https://senturk0.app.n8n.cloud/webhook/toplu_yatirim',
+    SUBMIT_ACTION: 'https://senturk0.app.n8n.cloud/webhook/varlik_ekleme_azaltma',
+    GET_ASSETS: 'https://senturk0.app.n8n.cloud/webhook/varlik_listele'
 };
 
 // --- MOCK DATA ---
@@ -131,11 +131,9 @@ async function handleLogin(e) {
             body: JSON.stringify({ actionType: 'login', email, password })
         });
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
         const data = await response.json();
 
-        if (data.success) {
+        if (data.success === true || data.success === 'true') {
             localStorage.setItem('toplu_yatirim_user', email);
             showToast(data.message || 'Başarıyla giriş yapıldı!', 'success');
             showDashboard(email);
@@ -170,11 +168,9 @@ async function handleRegister(e) {
             body: JSON.stringify({ actionType: 'register', name, email, password })
         });
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
         const data = await response.json();
 
-        if (data.success) {
+        if (data.success === true || data.success === 'true') {
             showToast(data.message || 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.', 'success');
             toggleAuthForms('login');
             document.getElementById('login-email').value = email;
@@ -287,11 +283,9 @@ async function handleActionSubmit(e) {
             body: formData // multipart/form-data
         });
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
         const data = await response.json();
 
-        if (data.success) {
+        if (data.success === true || data.success === 'true') {
             showToast(data.message || 'İşlem başarıyla n8n sistemine iletildi', 'success');
             elements.actionForm.reset();
             handleFileSelect(); // Reset UX states and hide file name display
@@ -323,11 +317,9 @@ async function loadAssetsData() {
             body: JSON.stringify({ actionType: 'getAssets', email: userEmail })
         });
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
         const data = await response.json();
 
-        if (data.success) {
+        if (data.success === true || data.success === 'true') {
             // Assume data.assets contains the array, or data itself if data.assets is undefined but data is an array
             assets = Array.isArray(data.assets) ? data.assets : (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
         } else {
@@ -445,11 +437,9 @@ window.handleDirectSell = async function (varlikKodu) {
             body: formData
         });
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
         const data = await response.json();
 
-        if (data.success) {
+        if (data.success === true || data.success === 'true') {
             showToast(data.message || `${miktar} adet ${varlikKodu} başarıyla n8n sistemine iletildi`, 'success');
             // Refresh table data
             loadAssetsData();

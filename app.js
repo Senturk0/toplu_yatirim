@@ -170,9 +170,13 @@ async function handleRegister(e) {
             body: JSON.stringify({ actionType: 'register', name, email, password })
         });
 
-        const data = await response.json();
+        let data = await response.json();
 
-        const isSuccess = data.success === true || data.success === 'true' || data.status === 'success' || (data.message && data.message.toLowerCase().includes('başarı'));
+        if (Array.isArray(data) && data.length > 0) {
+            data = data[0];
+        }
+
+        const isSuccess = data.success === true || data.success === 'true' || data.status === 'success' || (data.message && /başarı|basari/i.test(data.message));
 
         if (isSuccess) {
             showToast(data.message || 'Hesabınız oluşturuldu. Giriş yapabilirsiniz.', 'success');
